@@ -1,0 +1,12 @@
+{
+    "id": "{1814E0FB-46CF-8C8E-3343-5456F9D73634}",
+    "name": "PID_Controller",
+    "type": 3,
+    "vendor": "",
+    "aliases": [],
+    "parentRequirements": [],
+    "childRequirements": [],
+    "implemented": [],
+    "prefix": "PID",
+    "url": ""
+}

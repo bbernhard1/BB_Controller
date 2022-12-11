@@ -1,0 +1,12 @@
+{
+    "id": "{C8DFA785-000F-8109-92CC-D4054D8F81C1}",
+    "name": "OnOff_Controller",
+    "type": 3,
+    "vendor": "",
+    "aliases": [],
+    "parentRequirements": [],
+    "childRequirements": [],
+    "implemented": [],
+    "prefix": "ONOFF",
+    "url": ""
+}
