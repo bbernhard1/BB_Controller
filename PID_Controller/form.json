@@ -13,7 +13,7 @@
                
   
         { "type": "NumberSpinner", "name": "RecalcInterval", "caption": "Recalc Interval: If set to 0 the timed recalc will be off. In this case each update of the input variable triggers the recalculation", "suffix": "Seconds", "minimum": 0, "digits": 0,"width": "80%"},
-        { "type": "NumberSpinner", "name": "UpdateThres", "caption": "Update Threshold: The output will only be update if the difference to old value is above this setting. This is to preserve battery of actuators.  ", "suffix": "%", "minimum": 0, "maximum": 100, "digits": 0, "width": "80%"},
+        { "type": "NumberSpinner", "name": "UpdateThres", "caption": "Update Threshold: The output will only update if the difference to old value is above this setting. This is to preserve battery of actuators.  ", "suffix": "%", "minimum": 0, "maximum": 100, "digits": 0, "width": "80%"},
           
        
         {
@@ -23,10 +23,11 @@
                 { "type": "NumberSpinner", "name": "PFaktor", "caption": "Gain factor of proportional component", "digits": 1,"minimum": 0 },
                 { "type": "NumberSpinner", "name": "IFaktor", "caption": "Gain factor of integral component", "digits": 1,"minimum": 0 },
                 { "type": "NumberSpinner", "name": "DFaktor", "caption": "Gain factor of  differential component", "digits": 1,"minimum": 0}
-            ]
+                ]
             },
+            { "type": "NumberSpinner", "name": "IntegrationTime", "caption": "Integration time for integral component", "suffix": "Minutes", "digits": 1,"minimum": 1},
             { "type": "NumberSpinner", "name": "Scale", "caption": "Output scaling faktor. Map the regulator full scale to 0-100%", "digits": 1,"minimum": 0, "maximum":100},
-            { "type": "CheckBox", "name": "Invert", "caption": "Invert regulation. 100-0% instead of 0-100% (cooling instead of heating)" },
+            { "type": "CheckBox", "name": "Invert", "caption": "Normal regulation range: 0-100%, inverted regulation range 100-0% (cooling instead of heating)","value":false },
             { "type": "Label", "caption": "More information about PID controlers: https://en.wikipedia.org/wiki/PID_controller", "link": "true" }
         ],
 
@@ -36,12 +37,13 @@
         { 
             "type": "RowLayout",
             "items": [
-                { "type": "ValidationTextBox", "name": "CurrentError", "caption": "Difference between Target and Input", "value":" " , "enabled": false,"width": "200px"},   
              { "type": "ValidationTextBox", "name": "ProportialPart", "caption": "Proportial Part", "value":" ", "enabled": false,"width": "200px" },
              { "type": "ValidationTextBox", "name": "IntegralPart", "caption": "Integral Part", "value":" ", "enabled": false,"width": "200px" },
              { "type": "ValidationTextBox", "name": "DifferentialPart", "caption": "Differential Part", "value":" ", "enabled": false,"width": "200px" }
         ]
         },    
+        { "type": "ValidationTextBox", "name": "OutputValue", "caption": "Output (Scaled to 0-100%)", "value":" ", "enabled": false,"width": "200px" },
+     
         {    "type": "TestCenter"}
        
     ],

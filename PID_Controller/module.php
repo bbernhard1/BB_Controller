@@ -18,6 +18,7 @@ class PID_Controller extends IPSModule
         $this->RegisterPropertyInteger("ActualVariableID", 0);
         $this->RegisterPropertyFloat("PFaktor", 1);
         $this->RegisterPropertyFloat("IFaktor", 0);
+        $this->RegisterPropertyFloat("IntegrationTime", 1);
         $this->RegisterPropertyFloat("DFaktor", 0);
         $this->RegisterPropertyFloat("Scale", 3);
         $this->RegisterPropertyInteger("UpdateThres", 0);
@@ -31,6 +32,7 @@ class PID_Controller extends IPSModule
         $this->RegisterAttributeFloat("PrevErr", 0);
         $this->RegisterAttributeFloat("SummErr", 0);
         $this->RegisterAttributeFloat("PrevOutput", 0);
+        $this->RegisterAttributeInteger("PrevTimestamp", 0);
 
         //Timers
         $this->RegisterTimer('ReCalc', 0, "PID_UpdateOutputValue(\$_IPS['TARGET']);");
@@ -76,7 +78,6 @@ class PID_Controller extends IPSModule
         if ($SenderID == 'ReCalc') {
             $this->UpdateOutputValue();
         }
-
     }
 
     public function ApplyChanges()
@@ -97,7 +98,7 @@ class PID_Controller extends IPSModule
         }
 
         //Messages
-        
+
         $TargetVariableID = $this->ReadPropertyInteger('TargetVariableID');
         if (IPS_VariableExists($TargetVariableID)) {
             $this->RegisterMessage($TargetVariableID, VM_UPDATE);
@@ -109,7 +110,7 @@ class PID_Controller extends IPSModule
             $this->RegisterMessage($ActualVariableID, VM_UPDATE);
             #    SetValue($this->GetIDForIdent('Value'), $this->Calculate(GetValue($ActualVariableID)));
         }
-        
+
         //Delete all references in order to readd them
         foreach ($this->GetReferenceList() as $referenceID) {
             $this->UnregisterReference($referenceID);
@@ -143,22 +144,29 @@ class PID_Controller extends IPSModule
 
         $PrevErrVal = $this->ReadAttributeFloat("PrevErr");
         $this->WriteAttributeFloat("PrevErr", $ErrVal);
-
-        // Summ errors only if  output is not at fullscale 0 < 100
-        if (($this->ReadAttributeFloat('PrevOutput')) < 100 and ($this->ReadAttributeFloat('PrevOutput') > 0)) {
-            // Summ errors only if Summ is < 100 * IFaktor
-            if ($this->ReadPropertyFloat('IFaktor') > 0) {
-                if (($this->ReadAttributeFloat("SummErr") * (100 / $Scale)) < (100 * $this->ReadPropertyFloat('IFaktor'))) {
-                    $this->WriteAttributeFloat("SummErr", $this->ReadAttributeFloat("SummErr") + $ErrVal);
-                }
-            }
+   
+        if ($this->ReadPropertyFloat('IFaktor') > 0) {
+                 // Summ errors only after integration interval
+                   if (time() - $this->ReadAttributeInteger("PrevTimestamp") > $this->ReadPropertyFloat('IntegrationTime') * 60) {
+                        if (($ErrVal > 0) and ($this->ReadAttributeFloat('PrevOutput') < 95)) {
+                            $this->WriteAttributeInteger("PrevTimestamp", time());
+                            $OldSum = $this->ReadAttributeFloat("SummErr");
+                            $this->WriteAttributeFloat("SummErr", $OldSum + $ErrVal);
+                        }
+                        if (($ErrVal < 0) and ( $this->ReadAttributeFloat('PrevOutput') > 5)) {
+                            $this->WriteAttributeInteger("PrevTimestamp", time());
+                            $OldSum = $this->ReadAttributeFloat("SummErr");
+                            $this->WriteAttributeFloat("SummErr", $OldSum + $ErrVal);
+                        }
+                    }
         }
 
-        $PFaktor = $this->ReadPropertyFloat('PFaktor') * $ErrVal * (100 / $Scale);
-        $IFaktor = $this->ReadPropertyFloat('IFaktor') * $this->ReadAttributeFloat("SummErr") * (100 / $Scale);
-        $DFaktor = $this->ReadPropertyFloat('DFaktor') * ($ErrVal - $PrevErrVal) * (100 / $Scale);
+        $PFaktor = $this->ReadPropertyFloat('PFaktor') * $ErrVal;
+        $IFaktor = $this->ReadPropertyFloat('IFaktor') * $this->ReadAttributeFloat("SummErr");
+        $DFaktor = $this->ReadPropertyFloat('DFaktor') * ($ErrVal - $PrevErrVal);
 
         $PIDOutputValue =  $PFaktor + $IFaktor + $DFaktor;
+        $PIDOutputValue = $PIDOutputValue * (100 / $Scale);
 
         // Limit to 0-100
         if ($PIDOutputValue > 100) {
@@ -168,15 +176,18 @@ class PID_Controller extends IPSModule
             $PIDOutputValue = 0;
         }
 
-        // Update Output only if changes are big enough (actuator overload)
+        // Update Output only if changes are big enough (avoid actuator overload)
         if (abs($PIDOutputValue - $this->ReadAttributeFloat('PrevOutput')) > $this->ReadPropertyInteger('UpdateThres')) {
-            $PIDOutputValue = round($PIDOutputValue,0);
+            $PIDOutputValue = round($PIDOutputValue, 0);
             $this->WriteAttributeFloat("PrevOutput", $PIDOutputValue);
             $this->SetValue("PIDOutputValue", $PIDOutputValue);
             self::startScript($this->ReadPropertyInteger('OutScriptID'), $PIDOutputValue);
         }
+        
+    //    $PFaktor = $PFaktor * (100 / $Scale);
+    //    $IFaktor = $IFaktor * (100 / $Scale);
+    //    $DFaktor = $DFaktor * (100 / $Scale);
 
-        $this->UpdateFormField("CurrentError", "value", "$ErrVal");
         $this->UpdateFormField("ProportialPart", "value", "$PFaktor");
         $this->UpdateFormField("IntegralPart", "value", "$IFaktor");
         $this->UpdateFormField("DifferentialPart", "value", "$DFaktor");
@@ -242,7 +253,7 @@ class PID_Controller extends IPSModule
     {
         $this->SetValue(SetValue('ActualValue'), $Value);
     }
-  
+
     public function ResetInstance()
     {
         $this->SetValue("PIDOutputValue", 0);
@@ -250,7 +261,7 @@ class PID_Controller extends IPSModule
         $this->UpdateOutputValue();
     }
 /****************************************************************************** */
-// Private Functins    
+// Private Functins
     private static function startScript($scriptID, $PIDOutputValue)
     {
         if (!IPS_ScriptExists($scriptID)) {
