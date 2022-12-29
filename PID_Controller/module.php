@@ -16,14 +16,19 @@ class PID_Controller extends IPSModule
         //Poperties
         $this->RegisterPropertyInteger("TargetVariableID", 0);
         $this->RegisterPropertyInteger("ActualVariableID", 0);
+        $this->RegisterPropertyInteger("OutputVariableID", 0);
+
         $this->RegisterPropertyFloat("PFaktor", 1);
         $this->RegisterPropertyFloat("IFaktor", 0);
         $this->RegisterPropertyFloat("IntegrationTime", 1);
+        $this->RegisterPropertyBoolean("IntegrationMethode", true);
+
         $this->RegisterPropertyFloat("DFaktor", 0);
         $this->RegisterPropertyFloat("Scale", 3);
         $this->RegisterPropertyInteger("UpdateThres", 0);
         $this->RegisterPropertyInteger("RecalcInterval", 0);
-        $this->RegisterPropertyBoolean("Invert", false);
+    //    $this->RegisterPropertyBoolean("Invert", false);
+
 
         //Register Output Script
         $this->RegisterPropertyInteger("OutScriptID", 0);
@@ -123,6 +128,13 @@ class PID_Controller extends IPSModule
 
 
         $this->SetTimerInterval('ReCalc', $this->ReadPropertyInteger('RecalcInterval') * 1000);
+
+        // Avoid div/0
+        if ($this->ReadPropertyBoolean('IntegrationMethode') == false) {
+            $this->UpdateFormField("IntegrationTime", "value", 1);
+        }
+
+        $this->WriteAttributeInteger("PrevTimestamp", time());
     }
 
     public function UpdateOutputValue()
@@ -136,29 +148,50 @@ class PID_Controller extends IPSModule
         $Scale = $this->ReadPropertyFloat('Scale');
 
         // invert Output eg for Cooling
-        if ($this->ReadPropertyBoolean('Invert') == false) {
-            $ErrVal = $TargetValue - $ActualValue ;
-        } else {
-            $ErrVal = $ActualValue - $TargetValue;
-        }
+        // temporarly removed, cannot check if it works correct 
+        /*
+          if ($this->ReadPropertyBoolean('Invert') == false) {
+              $ErrVal = $TargetValue - $ActualValue ;
+          } else {
+              $ErrVal = $ActualValue - $TargetValue;
+          }
+          */
 
+        $ErrVal = $TargetValue - $ActualValue ;
+        
         $PrevErrVal = $this->ReadAttributeFloat("PrevErr");
         $this->WriteAttributeFloat("PrevErr", $ErrVal);
-   
+
         if ($this->ReadPropertyFloat('IFaktor') > 0) {
-                 // Summ errors only after integration interval
-                   if (time() - $this->ReadAttributeInteger("PrevTimestamp") > $this->ReadPropertyFloat('IntegrationTime') * 60) {
-                        if (($ErrVal > 0) and ($this->ReadAttributeFloat('PrevOutput') < 95)) {
-                            $this->WriteAttributeInteger("PrevTimestamp", time());
-                            $OldSum = $this->ReadAttributeFloat("SummErr");
-                            $this->WriteAttributeFloat("SummErr", $OldSum + $ErrVal);
-                        }
-                        if (($ErrVal < 0) and ( $this->ReadAttributeFloat('PrevOutput') > 5)) {
-                            $this->WriteAttributeInteger("PrevTimestamp", time());
-                            $OldSum = $this->ReadAttributeFloat("SummErr");
-                            $this->WriteAttributeFloat("SummErr", $OldSum + $ErrVal);
-                        }
+            // Summ errors with fixed integration interval
+            if ($this->ReadPropertyBoolean('IntegrationMethode') == true) {
+                if (time() - $this->ReadAttributeInteger("PrevTimestamp") > $this->ReadPropertyFloat('IntegrationTime') * 60) {
+                    if (($ErrVal > 0) and ($this->ReadAttributeFloat('PrevOutput') < 95)) {
+                        $this->WriteAttributeInteger("PrevTimestamp", time());
+                        $OldSum = $this->ReadAttributeFloat("SummErr");
+                        $this->WriteAttributeFloat("SummErr", $OldSum + $ErrVal);
                     }
+                    if (($ErrVal < 0) and ($this->ReadAttributeFloat('PrevOutput') > 0)) {
+                        $this->WriteAttributeInteger("PrevTimestamp", time());
+                        $OldSum = $this->ReadAttributeFloat("SummErr");
+                        $this->WriteAttributeFloat("SummErr", $OldSum + $ErrVal);
+                    }
+                }
+            }
+            // Summ errors with weighted integration interval
+            else {
+                $WeightFactor = (time() - $this->ReadAttributeInteger("PrevTimestamp")) / ($this->ReadPropertyFloat('IntegrationTime')*60) ;
+                if (($ErrVal > 0) and ($this->ReadAttributeFloat('PrevOutput') < 95)) {
+                    $this->WriteAttributeInteger("PrevTimestamp", time());
+                    $OldSum = $this->ReadAttributeFloat("SummErr");
+                    $this->WriteAttributeFloat("SummErr", $OldSum + ($ErrVal*$WeightFactor));
+                }
+                if (($ErrVal < 0) and ($this->ReadAttributeFloat('PrevOutput') > 0)) {
+                    $this->WriteAttributeInteger("PrevTimestamp", time());
+                    $OldSum = $this->ReadAttributeFloat("SummErr");
+                    $this->WriteAttributeFloat("SummErr", $OldSum + ($ErrVal*$WeightFactor));
+                }
+            }
         }
 
         $PFaktor = $this->ReadPropertyFloat('PFaktor') * $ErrVal;
@@ -168,7 +201,7 @@ class PID_Controller extends IPSModule
         $PIDOutputValue =  $PFaktor + $IFaktor + $DFaktor;
         $PIDOutputValue = $PIDOutputValue * (100 / $Scale);
 
-        // Limit to 0-100
+        // Limit to 0-100%
         if ($PIDOutputValue > 100) {
             $PIDOutputValue = 100;
         }
@@ -182,8 +215,16 @@ class PID_Controller extends IPSModule
             $this->WriteAttributeFloat("PrevOutput", $PIDOutputValue);
             $this->SetValue("PIDOutputValue", $PIDOutputValue);
             self::startScript($this->ReadPropertyInteger('OutScriptID'), $PIDOutputValue);
+
+            $IDOutputVariable = $this->ReadPropertyInteger('OutputVariableID');
+            if (IPS_VariableExists($IDOutputVariable)) {
+                if (IPS_GetVariable($IDOutputVariable)['VariableAction'] == 0) {
+                    SetValue($IDOutputVariable, $PIDOutputValue);
+                } else {
+                    RequestAction($IDOutputVariable, $PIDOutputValue);
+                }
+            }
         }
-        
     //    $PFaktor = $PFaktor * (100 / $Scale);
     //    $IFaktor = $IFaktor * (100 / $Scale);
     //    $DFaktor = $DFaktor * (100 / $Scale);
@@ -258,6 +299,7 @@ class PID_Controller extends IPSModule
     {
         $this->SetValue("PIDOutputValue", 0);
         $this->WriteAttributeFloat("SummErr", 0);
+        $this->WriteAttributeInteger("PrevTimestamp", time());
         $this->UpdateOutputValue();
     }
 /****************************************************************************** */
