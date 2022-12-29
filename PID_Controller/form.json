@@ -7,11 +7,10 @@
             {"type": "SelectVariable", "name": "TargetVariableID", "caption": "Select a variable which represents the setpoint for the regulation", "validVariableTypes": [1, 2],"width": "80%"},
             {"type": "SelectVariable", "name": "ActualVariableID", "caption": "Select a variable which represents the measured input value", "validVariableTypes": [1, 2],"width": "80%"},
             {"type": "SelectVariable", "name": "OutputVariableID", "caption": "Optional: Select the actuator input variable. Range 0-100%", "validVariableTypes": [1, 2],"width": "80%"},
-            {"caption": "Optional: Select a script to be called each time the output value is updated. The value can be accessed with $_IPS['Value']", "name": "OutScriptID", "type": "SelectScript", "width": "80%"}
+            {"caption": "Optional: Select a script to be called each time the output value is updated. The value can be accessed with $_IPS['Value']", "name": "OutScriptID", "type": "SelectScript", "width": "80%"},
+            { "type": "NumberSpinner", "name": "AverageInputCount", "caption": "Average count for measured values (0 ... averaging off)", "digits": 0,"minimum": 0,"width": "30%"}
         ]
         },
-               
-  
          
         {
         "type": "ExpansionPanel",
@@ -43,7 +42,7 @@
         { "type": "NumberSpinner", "name": "RecalcInterval", "caption": "Recalc Interval: If set to 0 the timed recalc will be off. In this case each update of the input variable triggers the recalculation", "suffix": "Seconds", "minimum": 0, "digits": 0,"width": "80%"},
         { "type": "NumberSpinner", "name": "UpdateThres", "caption": "Update Threshold: The output will only update if the difference to old value is above this setting. This is to preserve battery of actuators.  ", "suffix": "%", "minimum": 0, "maximum": 100, "digits": 0, "width": "80%"},
     
-            { "type": "NumberSpinner", "name": "Scale", "caption": "Output scaling faktor. Map the regulator full scale to 0-100%", "digits": 1,"minimum": 0, "maximum":100},
+            { "type": "NumberSpinner", "name": "Scale", "caption": "Output scaling faktor. Map the regulator full scale to 0-100%", "digits": 1,"minimum": 0, "maximum":100, "width": "80%"},
             { "type": "Label", "caption": "More information about PID controlers: https://en.wikipedia.org/wiki/PID_controller", "link": "true" },
             { "type": "Label", "caption": "German version: https://de-academic.com/dic.nsf/dewiki/641023#I-Regler_.28I-Anteil.29", "link": "true" }
     ],

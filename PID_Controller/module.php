@@ -16,6 +16,7 @@ class PID_Controller extends IPSModule
         //Poperties
         $this->RegisterPropertyInteger("TargetVariableID", 0);
         $this->RegisterPropertyInteger("ActualVariableID", 0);
+        $this->RegisterPropertyInteger("AverageInputCount", 0);
         $this->RegisterPropertyInteger("OutputVariableID", 0);
 
         $this->RegisterPropertyFloat("PFaktor", 1);
@@ -144,8 +145,18 @@ class PID_Controller extends IPSModule
         }
 
         $TargetValue = GetValueFloat($this->GetIDForIdent('TargetValue'));
-        $ActualValue = GetValueFloat($this->GetIDForIdent('ActualValue'));
-        $Scale = $this->ReadPropertyFloat('Scale');
+
+
+        if (($this->ReadPropertyInteger('AverageInputCount') > 0) and ($this->GetIDForIdent('ActualValue')===true)){
+            $ArchiveID = IPS_GetInstanceListByModuleID("{43192F0B-135B-4CE7-A0A7-1475603F3060}")[0];
+            $InputVariableID = $this->GetIDForIdent('ActualValue');
+            $ActualValue = AC_GetLoggedValues ( $ArchiveID, $InputVariableID, 0, time() ,$this->ReadPropertyInteger('AverageInputCount')); 
+        }
+        else {
+            $ActualValue = GetValueFloat($this->GetIDForIdent('ActualValue'));
+        }
+
+            $Scale = $this->ReadPropertyFloat('Scale');
 
         // invert Output eg for Cooling
         // temporarly removed, cannot check if it works correct 
@@ -300,6 +311,7 @@ class PID_Controller extends IPSModule
         $this->SetValue("PIDOutputValue", 0);
         $this->WriteAttributeFloat("SummErr", 0);
         $this->WriteAttributeInteger("PrevTimestamp", time());
+        $this->WriteAttributeFloat("PrevOutput", 50);
         $this->UpdateOutputValue();
     }
 /****************************************************************************** */
