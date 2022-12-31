@@ -50,7 +50,7 @@ class PID_Controller extends IPSModule
         $this->RegisterPropertyString('DebugOutputValue', '');
 
         //Variables
-        $this->RegisterVariableBoolean('Active', 'Module active', '~Switch', 0);
+        $this->RegisterVariableBoolean('Active', 'Module Active', '~Switch', 0);
         $this->EnableAction('Active');
         $this->RegisterVariableBoolean('Reset', 'Module Reset (Pushfunction, returns to false) ', '~Switch', 1);
         $this->EnableAction('Reset');
@@ -206,7 +206,7 @@ class PID_Controller extends IPSModule
         }
 
         // Update Output only if changes are big enough (avoid actuator overload)
-        if (abs($PIDOutputValue - $this->ReadAttributeFloat('PrevOutput')) > $this->ReadPropertyInteger('UpdateThres')) {
+        if (abs($PIDOutputValue - $this->ReadAttributeFloat('PrevOutput')) > $this->ReadPropertyInteger('UpdateThres') or (abs($PIDOutputValue) < $this->ReadPropertyInteger('UpdateThres'))){
             $PIDOutputValue = round($PIDOutputValue, 0);
             $this->WriteAttributeFloat("PrevOutput", $PIDOutputValue);
             $this->SetValue("PIDOutputValue", $PIDOutputValue);
@@ -311,6 +311,7 @@ class PID_Controller extends IPSModule
     }
 
     private function calcSummErr($Error, $Factor)
+    // calculate summ of reulation error (for integral) 
     {
         $this->WriteAttributeInteger("PrevTimestamp", time());
         $OldSum = $this->ReadAttributeFloat("SummErr");
@@ -318,9 +319,10 @@ class PID_Controller extends IPSModule
     }
 
     private function calcActualValue() 
+    // returns x sample mean of regulator input value
     {
         $ArchiveID = IPS_GetInstanceListByModuleID("{43192F0B-135B-4CE7-A0A7-1475603F3060}")[0];
-        // 3600*24, not nice to hardcode this, but 1 day should be good for all use cases
+        // 3600*24, not nice to hardcode, but 1 day should be good for all use cases
         $logData = AC_GetLoggedValues($ArchiveID, $this->ReadPropertyInteger('ActualVariableID'), time()- 3600*24, time(), $this->ReadPropertyInteger('AverageInputCount'));
         if (count($logData) <2) {
             $ActualValue = GetValueFloat($this->GetIDForIdent('ActualValue'));

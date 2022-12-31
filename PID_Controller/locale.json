@@ -2,25 +2,25 @@
     "translations": {
         "de": {
             "In- / Output Variables": "Eingangs / Ausgangs Variablen",
-            "Select a variable which represents the setpoint for the regulation": "Variable welche den Sollwert enthält",
-            "Select a variable which represents the measured input value": "Variable welche den Eingangswert (aktuellen Messwert) enthält",
-            "Optional: Select the actuator input variable. Range 0-100%": "Optional: Variable welche Stellwert enthält. Bereich 0-100%",
-            "Optional: Select a script to be called each time the output value is updated. The value can be accessed with $_IPS['Value']": "Optional: Script welches bei jdem Update des Stelwlertes aufgerufen wird. Der Stellwert wird nach $_IPS['Value'] übergeben",
-            "Average count for measured values (1 ... averaging off)": "Mittelwertbildung aus x Messwerten (1... keine Mittelwertbildung)",
+            "Select a variable which represents the setpoint for the regulation": "Sollwert: Variable welche den Sollwert enthält",
+            "Select a variable which represents the measured input value": "Istwert: Variable welche den Istwert (aktuellen Messwert) enthält",
+            "Optional: Select the actuator input variable. Range 0-100%": "Stellwert: (optional) Variable welche den Stellwert enthält. Bereich 0-100%",
+            "Optional: Select a script to be called each time the output value is updated. The value can be accessed with $_IPS['Value']": "Stellwert Script: (optional) Script welches bei jdem Update des Stellwertes aufgerufen wird. Der Stellwert wird nach $_IPS['Value'] übergeben",
+            "Average count for measured values (1 ... averaging off)": "Mittelwert: Mittelwertbildung aus den jeweils aktuellsten x Werten des Istwertes (1... keine Mittelwertbildung)",
 
             "Regulation Parameters":"PID Reglereinstellungen",
-            "Scaling factor for proportional component (0..1)": "Skalierungsfaktor des Proportionalanteils (0..1)",
-            "Scaling factor for integral component (0..1)": "Skalierungsfaktor des Integralanteils (0..1)",
-            "Scaling factor for differential component (0..1)": "Skalierungsfaktor des Differentailanteils (0..1)",
+            "Scaling factor for proportional component (0..1)": "Proportional: Skalierungsfaktor des Proportionalanteils (0..1)",
+            "Scaling factor for integral component (0..1)": "Integral: Skalierungsfaktor des Integralanteils (0..1)",
+            "Scaling factor for differential component (0..1)": "Differential: Skalierungsfaktor des Differentailanteils (0..1)",
 
             "OFF: Integration time is fixed interval": "AUS: Bewertung des Integralanteils mit fixen Zeitintervallen",
             "ON: Integration time is weighted with the time needed to reach target value": "EIN: Bewertung des Integralanteils proportional zur Nachregelzeit",
             "Fixed / Weighted": "Fix / Proportional",
-            "Integration time": "Integrationszeit / Nachregelzeit",
+            "Integration time": "Zeitkonstante",
 
             "Recalc Interval: If set to 0 the timed recalc will be off. In this case each update of the input variable triggers the recalculation": "Berechungsinterval: Wenn '0' so löst jedes Aktualisierung des Eingangswertes eine Neuberechnung aus ", 
-            "Update Threshold: The output will only update if the difference to old value is above this setting. This is to preserve battery of actuators.": "Mindeständerung des Stellwertes: Der Wert der Stellwertvariablen wird nur dann aktualisiert wenn sich der berechnete Wert mindestens um diese Schwelle ändert",
-            "Output scaling faktor: Map the regulator full scale to 0-100%": "Skalierung des Stellwertes: Zur Anpassung des Reglerausganges an den Austeurbereich des Aktors.",
+            "Update Threshold: The output will only update if the difference to old value is above this setting. This is to preserve battery of actuators.": "Mindeständerung: Die Stellwertvariable wird nur dann aktualisiert wenn sich der berechnete Wert mindestens um diese Schwelle ändert",
+            "Output scaling faktor: Map the regulator full scale to 0-100%": "Skalierung: Zur Anpassung des Stellwertes an den Austeurbereich des Aktors.",
 
             "Seconds": "Sekunden",
             "Minutes": "Minuten"
