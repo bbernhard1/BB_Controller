@@ -48,15 +48,24 @@
     ],
         "actions": [
         { "type": "Label", "caption": "Debug output of regulation components (will be removed in final version)" },
+        { "type": "Label", "caption": "When manipulation Target or Actual values in thed debug section, then make sure that Averaging is set to '1' and CalculationInterval is set to '0'"},
+        { "type": "Label", "caption": "Otherwise calculation will not performed as expected" },
    
         { 
             "type": "RowLayout",
             "items": [
              { "type": "ValidationTextBox", "name": "ProportialPart", "caption": "Proportial Part", "value":" ", "enabled": false,"width": "200px" },
              { "type": "ValidationTextBox", "name": "IntegralPart", "caption": "Integral Part", "value":" ", "enabled": false,"width": "200px" },
-             { "type": "ValidationTextBox", "name": "DifferentialPart", "caption": "Differential Part", "value":" ", "enabled": false,"width": "200px" },
-             { "type": "ValidationTextBox", "name": "OutputValue", "caption": "Output (Scaled to 0-100%)", "value":" ", "enabled": false,"width": "200px" },
-             { "type": "ValidationTextBox", "name": "ActualValue", "caption": "Input Value for calculation", "value":" ", "enabled": false,"width": "200px" }
+             { "type": "ValidationTextBox", "name": "DifferentialPart", "caption": "Differential Part", "value":" ", "enabled": false,"width": "200px" }
+        ]
+        },    
+
+        { 
+            "type": "RowLayout",
+            "items": [
+             { "type": "ValidationTextBox", "name": "ActualValue", "caption": "Actual Value", "value":" ", "digits": 1,"enabled": false,"width": "200px" },
+             { "type": "ValidationTextBox", "name": "TargetValue", "caption": "Target Value", "value":" ", "digits": 1,"enabled": false,"width": "200px" },
+             { "type": "ValidationTextBox", "name": "OutputValue", "caption": "Output (Scaled to 0-100%)", "value":" ", "enabled": false,"width": "200px" }
         ]
         },    
         
