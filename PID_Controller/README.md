@@ -25,7 +25,7 @@ https://de-academic.com/dic.nsf/dewiki/641023#I-Regler_.28I-Anteil.29
 
 ### 3. Software-Installation
 
-* Über den Module Store das 'PID_Controller'-Modul installieren.
+* Über den Module Store das 'PID_Controller'- Modul installieren.
 * Alternativ über das Module Control folgende URL hinzufügen:
 https://github.com/bbernhard1/BB_Controller/tree/master/PID_Controller
 
