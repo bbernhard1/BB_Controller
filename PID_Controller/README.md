@@ -40,8 +40,8 @@ __Konfigurationsseite__:
 ___Bereich Eingangs / Ausgangsvariablen___
 Name     | Beschreibung
 -------- | ------------------
- Sollwert        | Variable welche den Sollwert enthält
- Istwert         | Variable welche den istwert (aktuellen Messwert) enthält, alternativ kann der Istwert auch per Script übergeben werden
+ Sollwert        | Optional: Variable welche den Sollwert enthält, wenn nichts ausgewählt ist, so wird die TargetVariable des Moduls benutzt
+ Istwert         | Optional: Variable welche den Istwert enthält , wenn nichts ausgewählt ist, so wird die TargetVariable des Moduls benutzt(aktuellen Messwert) enthält, alternativ kann der Istwert auch per Script übergeben werden
  Stellwert       | Optional: Variable welche den Stellwert des enthält. Dieser wird immer in den Bereich 0-100% skaliert"
  Stellwert Script| Optional: Script welches bei jdem Update des Stellwertes aufgerufen wird. Der Stellwert wird nach $_IPS['Value'] übergeben. 
  Mittelwert      | Mittelwertbildung aus den jeweils aktuellsten x Werten des Istwertes (wenn '1' dann erfolgt keine Mittelwertbildung, es wird der jeweils aktuellste Istwert verwendet).
