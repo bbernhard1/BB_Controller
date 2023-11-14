@@ -142,8 +142,11 @@ class PID_Controller extends IPSModule
             return;
         }
 
-        $TargetValue = GetValueFloat( $this->ReadPropertyInteger('TargetVariableID'));
-       
+
+        if (IPS_VariableExists($this->ReadPropertyInteger('TargetVariableID')) == true) {
+            $TargetValue = GetValueFloat( $this->ReadPropertyInteger('TargetVariableID'));
+        }
+
         // calc mean for actual measured value
         $ActualValue =  $this->calcActualValue();
 
