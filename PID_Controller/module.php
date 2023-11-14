@@ -73,7 +73,7 @@ class PID_Controller extends IPSModule
     public function MessageSink($TimeStamp, $SenderID, $Message, $Data)
     {
         # IPS_LogMessage("MessageSink", "Message from SenderID ".$SenderID." with Message ".$Message."\r\n Data: ".print_r($Data, true));
-      
+
         // Trigger ReCalc either timer based or based InputValue based
         if (($Message == VM_UPDATE)  and ($this->ReadPropertyInteger('RecalcInterval') == 0)) {
         //    SetValue($this->GetIDForIdent('TargetValue'), GetValueFloat($this->ReadPropertyInteger('TargetVariableID')));
@@ -171,6 +171,7 @@ class PID_Controller extends IPSModule
         if ($this->ReadPropertyFloat('IFaktor') > 0) {
             // Summ errors with fixed integration interval
             if ($this->ReadPropertyBoolean('IntegrationMethode') == false) {
+      #          $this->WriteAttributeInteger("PrevTimestamp", time());  // trial
                 if (time() - $this->ReadAttributeInteger("PrevTimestamp") > $this->ReadPropertyFloat('IntegrationTime') * 60) {
                     if (($ErrVal > 0) and ($this->ReadAttributeFloat('PrevOutput') < 95)) {
                         $this->calcSummErr($ErrVal, 1);
@@ -208,7 +209,8 @@ class PID_Controller extends IPSModule
         }
 
         // Update Output only if changes are big enough (avoid actuator overload)
-        if (abs($PIDOutputValue - $this->ReadAttributeFloat('PrevOutput')) > $this->ReadPropertyInteger('UpdateThres') or (abs($PIDOutputValue) < $this->ReadPropertyInteger('UpdateThres'))) {
+   #     if (abs($PIDOutputValue - $this->ReadAttributeFloat('PrevOutput')) > $this->ReadPropertyInteger('UpdateThres') or (abs($PIDOutputValue) < $this->ReadPropertyInteger('UpdateThres'))) {
+        if (abs($PIDOutputValue - $this->ReadAttributeFloat('PrevOutput')) > $this->ReadPropertyInteger('UpdateThres')) {
             $PIDOutputValue = round($PIDOutputValue, 0);
             $this->WriteAttributeFloat("PrevOutput", $PIDOutputValue);
             $this->SetValue("PIDOutputValue", $PIDOutputValue);
@@ -314,11 +316,14 @@ class PID_Controller extends IPSModule
     }
 
     private function calcSummErr($Error, $Factor)
-    // calculate summ of reulation error (for integral)
+    // calculate summ of regulation error (for integral)
     {
-        $this->WriteAttributeInteger("PrevTimestamp", time());
-        $OldSum = $this->ReadAttributeFloat("SummErr");
-        $this->WriteAttributeFloat("SummErr", $OldSum + ($Error *  $Factor));
+        $NewError = $this->ReadAttributeFloat("SummErr") + ($Error *  $Factor);
+        $NewIPart = $NewError * $this->ReadPropertyFloat('IFaktor') * (100/ $this->ReadPropertyFloat('Scale'));
+        if (($NewIPart  < 100) and ($NewIPart > 0)) {
+            $this->WriteAttributeInteger("PrevTimestamp", time());
+            $this->WriteAttributeFloat("SummErr", $NewError);
+        }
     }
 
     private function calcActualValue()
@@ -330,7 +335,7 @@ class PID_Controller extends IPSModule
         }
 
         $ArchiveID = IPS_GetInstanceListByModuleID("{43192F0B-135B-4CE7-A0A7-1475603F3060}")[0];
-      
+
         // variable defined, but not archived
         if (AC_GetLoggingStatus($ArchiveID, $this->ReadPropertyInteger('ActualVariableID'))== false) {
             return GetValueFloat($this->GetIDForIdent('ActualValue'));
@@ -338,7 +343,7 @@ class PID_Controller extends IPSModule
 
         // 3600*24, not nice to hardcode, but 1 day should be good for all use cases
         $logData = AC_GetLoggedValues($ArchiveID, $this->ReadPropertyInteger('ActualVariableID'), time()- 3600*24, time(), $this->ReadPropertyInteger('AverageInputCount'));
-        if (count($logData) <2)  {
+        if (count($logData) <2) {
             return GetValueFloat($this->GetIDForIdent('ActualValue'));
         } else {
             foreach ($logData as $key => $data) {
