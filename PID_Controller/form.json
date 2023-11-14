@@ -48,7 +48,7 @@
     ],
         "actions": [
         { "type": "Label", "caption": "Debug output of regulation components (will be removed in final version)" },
-        { "type": "Label", "caption": "When manipulation Target or Actual values in thed debug section, then make sure that Averaging is set to '1' and CalculationInterval is set to '0'"},
+        { "type": "Label", "caption": "When manipulation Target or Actual values in the debug section, then make sure that averaging is set to '1' and CalculationInterval is set to '0'"},
         { "type": "Label", "caption": "Otherwise calculation will not performed as expected" },
    
         { 

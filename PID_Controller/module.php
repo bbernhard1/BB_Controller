@@ -12,7 +12,6 @@ class PID_Controller extends IPSModule
         //Variables
         $this->RegisterVariableFloat("PIDOutputValue", "Output Value 0-100", "");
 
-
         //Poperties
         $this->RegisterPropertyInteger("TargetVariableID", 0);
         $this->RegisterPropertyInteger("ActualVariableID", 0);
@@ -29,7 +28,6 @@ class PID_Controller extends IPSModule
         $this->RegisterPropertyInteger("UpdateThres", 0);
         $this->RegisterPropertyInteger("RecalcInterval", 0);
     //    $this->RegisterPropertyBoolean("Invert", false);
-
 
         //Register Output Script
         $this->RegisterPropertyInteger("OutScriptID", 0);
@@ -76,7 +74,7 @@ class PID_Controller extends IPSModule
 
         // Trigger ReCalc either timer based or based InputValue based
         if (($Message == VM_UPDATE)  and ($this->ReadPropertyInteger('RecalcInterval') == 0)) {
-        //    SetValue($this->GetIDForIdent('TargetValue'), GetValueFloat($this->ReadPropertyInteger('TargetVariableID')));
+            SetValue($this->GetIDForIdent('TargetValue'), GetValueFloat($this->ReadPropertyInteger('TargetVariableID')));
             SetValue($this->GetIDForIdent('ActualValue'), GetValueFloat($this->ReadPropertyInteger('ActualVariableID')));
             $this->UpdateOutputValue();
         }
@@ -110,13 +108,11 @@ class PID_Controller extends IPSModule
         $TargetVariableID = $this->ReadPropertyInteger('TargetVariableID');
         if (IPS_VariableExists($TargetVariableID)) {
             $this->RegisterMessage($TargetVariableID, VM_UPDATE);
-            #    SetValue($this->GetIDForIdent('Value'), $this->Calculate(GetValue($TargetVariableID)));
         }
 
         $ActualVariableID = $this->ReadPropertyInteger('ActualVariableID');
         if (IPS_VariableExists($ActualVariableID)) {
             $this->RegisterMessage($ActualVariableID, VM_UPDATE);
-            # SetValue($this->GetIDForIdent('Value'), $this->Calculate(GetValue($ActualVariableID)));
         }
 
         //Delete all references in order to readd them
@@ -146,8 +142,8 @@ class PID_Controller extends IPSModule
             return;
         }
 
-        $TargetValue = GetValueFloat($this->GetIDForIdent('TargetValue'));
-
+        $TargetValue = GetValueFloat( $this->ReadPropertyInteger('TargetVariableID'));
+       
         // calc mean for actual measured value
         $ActualValue =  $this->calcActualValue();
 
@@ -171,7 +167,6 @@ class PID_Controller extends IPSModule
         if ($this->ReadPropertyFloat('IFaktor') > 0) {
             // Summ errors with fixed integration interval
             if ($this->ReadPropertyBoolean('IntegrationMethode') == false) {
-      #          $this->WriteAttributeInteger("PrevTimestamp", time());  // trial
                 if (time() - $this->ReadAttributeInteger("PrevTimestamp") > $this->ReadPropertyFloat('IntegrationTime') * 60) {
                     if (($ErrVal > 0) and ($this->ReadAttributeFloat('PrevOutput') < 95)) {
                         $this->calcSummErr($ErrVal, 1);
@@ -209,7 +204,6 @@ class PID_Controller extends IPSModule
         }
 
         // Update Output only if changes are big enough (avoid actuator overload)
-   #     if (abs($PIDOutputValue - $this->ReadAttributeFloat('PrevOutput')) > $this->ReadPropertyInteger('UpdateThres') or (abs($PIDOutputValue) < $this->ReadPropertyInteger('UpdateThres'))) {
         if (abs($PIDOutputValue - $this->ReadAttributeFloat('PrevOutput')) > $this->ReadPropertyInteger('UpdateThres')) {
             $PIDOutputValue = round($PIDOutputValue, 0);
             $this->WriteAttributeFloat("PrevOutput", $PIDOutputValue);
@@ -329,7 +323,7 @@ class PID_Controller extends IPSModule
     private function calcActualValue()
     // returns x sample mean of regulator input value
     {
-        // variable not deefined
+        // variable not defined
         if (IPS_VariableExists($this->ReadPropertyInteger('ActualVariableID')) == false) {
             return GetValueFloat($this->GetIDForIdent('ActualValue'));
         }
