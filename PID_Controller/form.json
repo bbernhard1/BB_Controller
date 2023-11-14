@@ -4,8 +4,8 @@
         "type": "ExpansionPanel",
         "caption": "In- / Output Variables",
         "items": [
-            {"type": "SelectVariable", "name": "TargetVariableID", "caption": "Select a variable which represents the setpoint for the regulation", "validVariableTypes": [1, 2],"width": "80%"},
-            {"type": "SelectVariable", "name": "ActualVariableID", "caption": "Select a variable which represents the measured input value", "validVariableTypes": [1, 2],"width": "80%"},
+            {"type": "SelectVariable", "name": "TargetVariableID", "caption": "Optional: Select a alterantive variable which represents the setpoint for the regulation" , "validVariableTypes": [1, 2],"width": "80%"},
+            {"type": "SelectVariable", "name": "ActualVariableID", "caption": "Optional: Select a alternative variable which represents the measured input value", "validVariableTypes": [1, 2],"width": "80%"},
             {"type": "SelectVariable", "name": "OutputVariableID", "caption": "Optional: Select the actuator input variable. Range 0-100%", "validVariableTypes": [1, 2],"width": "80%"},
             {"caption": "Optional: Select a script to be called each time the output value is updated. The value can be accessed with $_IPS['Value']", "name": "OutScriptID", "type": "SelectScript", "width": "80%"},
             { "type": "NumberSpinner", "name": "AverageInputCount", "caption": "Average count for measured values (1 ... averaging off)", "digits": 0,"minimum": 1,"width": "40%"}
