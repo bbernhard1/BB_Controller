@@ -74,12 +74,8 @@ class PID_Controller extends IPSModule
 
         // Trigger ReCalc either timer based or based InputValue based
         if (($Message == VM_UPDATE)  and ($this->ReadPropertyInteger('RecalcInterval') == 0)) {
-            SetValue($this->GetIDForIdent('TargetValue'), GetValueFloat($this->ReadPropertyInteger('TargetVariableID')));
-            SetValue($this->GetIDForIdent('ActualValue'), GetValueFloat($this->ReadPropertyInteger('ActualVariableID')));
             $this->UpdateOutputValue();
         }
-
-
 
         if ($SenderID == 'ReCalc') {
             $this->UpdateOutputValue();
@@ -125,7 +121,6 @@ class PID_Controller extends IPSModule
             $this->UnregisterReference($reference);
         }
 
-
         $this->SetTimerInterval('ReCalc', $this->ReadPropertyInteger('RecalcInterval') * 1000);
 
         // Avoid div/0
@@ -145,6 +140,9 @@ class PID_Controller extends IPSModule
 
         if (IPS_VariableExists($this->ReadPropertyInteger('TargetVariableID')) == true) {
             $TargetValue = GetValueFloat( $this->ReadPropertyInteger('TargetVariableID'));
+        }
+        else {
+            $TargetValue = GetValueFloat($this->GetIDForIdent('TargetValue'));
         }
 
         // calc mean for actual measured value
